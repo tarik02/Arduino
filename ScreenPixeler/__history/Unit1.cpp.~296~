@@ -1,0 +1,284 @@
+//---------------------------------------------------------------------------
+
+#include <fmx.h>
+#pragma hdrstop
+
+#include "Unit1.h"
+//---------------------------------------------------------------------------
+#pragma package(smart_init)
+#pragma resource "*.fmx"
+TForm1 *Form1;
+//---------------------------------------------------------------------------
+__fastcall TForm1::TForm1(TComponent* Owner)
+	: TForm(Owner)
+{
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm1::FormCreate(TObject *Sender)
+{
+	pWidth = pHeight = 0;
+											 // 01100000
+	//ShowMessage(IntToStr(0x60 & (1 << 5)));
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm1::FormDestroy(TObject *Sender)
+{
+	for (int i = 0; i < pWidth; i++)
+		for (int j = 0; j < pHeight; j++)
+		{
+      Pixels[i][j]->DisposeOf();
+		};
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm1::PixelClick(TObject *Sender)
+{
+	switch (((TRectangle *)Sender)->Fill->Color)
+	{
+		case 0xFF33CC33:
+		((TRectangle *)Sender)->Fill->Color = 0xFF333333;
+		break;
+		case 0xFF333333:
+		((TRectangle *)Sender)->Fill->Color = 0xFF33CC33;
+		break;
+	};
+
+	//PrintResult();
+}
+//---------------------------------------------------------------------------
+void TForm1::PrintResult()
+{
+	int i,j;
+	unsigned char B;
+
+	Form2->Memo2->Text = "{\r\n";
+
+	for (i = 0; i < pHeight; i++)
+	{
+		for (j = 0; j < (pWidth + 7) / 8; j++)
+		{
+			Form2->Memo2->Text = Form2->Memo2->Text + "  B";
+			//if (Pixels[i][j]->Fill->Color == 0xFF333333)
+			//	B |= (1 << j);
+			for (int v = j * 8; v < j * 8 + 8; v++)
+				Form2->Memo2->Text = Form2->Memo2->Text + ((v >= pWidth) ? "0" : ((Pixels[v][i]->Fill->Color == 0xFF333333) ? "0" : "1"));
+			Form2->Memo2->Text = Form2->Memo2->Text + ",";
+		};
+		Form2->Memo2->Text = Form2->Memo2->Text + "\r\n";
+    //Edit1->Text = Edit1->Text + String((i == 0) ? "" : ",") + "0x" + IntToHex(B,2);
+	};
+	Form2->Memo2->Text = Form2->Memo2->Text + "}";
+};
+//---------------------------------------------------------------------------
+void TForm1::ReadData()
+{
+	for (int i = 0; i < pWidth; i++)
+		for (int j = 0; j < pHeight; j++)
+		{
+      Pixels[i][j]->DisposeOf();
+		};
+
+
+	pWidth = StrToInt(Form2->Edit1->Text);
+	pHeight = StrToInt(Form2->Edit2->Text);
+
+	ClientWidth = pWidth * 15;
+  ClientHeight = pHeight * 15;
+
+
+	Pixels = new TRectangle **[pWidth];
+	for (int i = 0; i < pWidth; i++)
+	{
+		Pixels[i] = new TRectangle *[pHeight];
+		for (int j = 0; j < pHeight; j++)
+		{
+			Pixels[i][j] = new TRectangle(this);
+		};
+	};
+
+  bool Read = Trim(Form2->Memo1->Text) != "";
+
+	byte **PixelsData;
+	String ReadData;
+	if (Read)
+	{
+		PixelsData = new byte *[pWidth];
+		for (int i = 0; i < pWidth; i++)
+		{
+			PixelsData[i] = new byte[pHeight];
+		};
+		ReadData = Trim(Form2->Memo1->Text);
+		ReadData = StringReplace(ReadData,"{","",TReplaceFlags() << rfReplaceAll);
+		ReadData = StringReplace(ReadData,"}","",TReplaceFlags() << rfReplaceAll);
+		ReadData = StringReplace(ReadData,"\r\n","",TReplaceFlags() << rfReplaceAll);
+		ReadData = StringReplace(ReadData," ","",TReplaceFlags() << rfReplaceAll);
+		ReadData = StringReplace(ReadData,",","\r\n",TReplaceFlags() << rfReplaceAll);
+		//ShowMessage(ReadData);
+	};
+
+	for (int j = 0; j < pHeight; j++)
+	{
+    for (int i = 0; i < pWidth; i++)
+		{
+			Pixels[i][j]->Parent = PixelsConteiner;
+			Pixels[i][j]->Position->X = 15 * i;
+			Pixels[i][j]->Position->Y = 15 * j;
+			Pixels[i][j]->Width = 15;
+			Pixels[i][j]->Height = 15;
+			Pixels[i][j]->Stroke->Kind = TBrushKind::None;
+			Pixels[i][j]->Fill->Color = 0xFF33CC33;
+			Pixels[i][j]->OnClick = PixelClick;
+		};
+	};
+
+  byte d;
+
+	if (Read)
+	{
+		TStringList *SL = new TStringList;
+		SL->Text = ReadData;
+
+		for (int j = 0; j < pHeight; j++)
+		{
+			for (int i = 0; i < pWidth; i++)
+			{
+				//ShowMessage(j * 2 + (i / 8));
+				d = StrToInt(SL->Strings[j * 2 + (i / 8)]);
+
+				if ((d & (1 << (7 - (i % 8)))) != 0)
+				{
+					Pixels[i][j]->Fill->Color = 0xFF33CC33;
+				}
+				else
+				{
+				  Pixels[i][j]->Fill->Color = 0xFF333333;
+				};
+			};
+		};
+
+		SL->DisposeOf();
+	};
+};
+
+void TForm1::Rot90()
+{
+	TColor **ta;
+
+	ta = new TColor *[pWidth];
+
+	for (int i = 0; i < pWidth; i++)
+	{
+		ta[i] = new TColor[pHeight];
+		for (int j = 0; j < pHeight; j++)
+		{
+			ta[i][j] = Pixels[i][j]->Fill->Color;
+		};
+	};
+
+	for (int i = 0; i < pWidth; i++)
+		for (int j = 0; j < pHeight; j++)
+		{
+      Pixels[i][j]->DisposeOf();
+		};
+
+
+	int pTemp = pWidth;
+	pWidth = pHeight;
+	pHeight = pTemp;
+
+  ClientWidth = pWidth * 15;
+  ClientHeight = pHeight * 15;
+
+
+	Pixels = new TRectangle **[pWidth];
+	for (int i = 0; i < pWidth; i++)
+	{
+		Pixels[i] = new TRectangle *[pHeight];
+		for (int j = 0; j < pHeight; j++)
+		{
+			Pixels[i][j] = new TRectangle(this);
+			Pixels[i][j]->Parent = PixelsConteiner;
+			Pixels[i][j]->Position->X = 15 * i;
+			Pixels[i][j]->Position->Y = 15 * j;
+			Pixels[i][j]->Width = 15;
+			Pixels[i][j]->Height = 15;
+			Pixels[i][j]->Stroke->Kind = TBrushKind::None;
+			Pixels[i][j]->Fill->Color = ta[j][pWidth - i - 1];
+			Pixels[i][j]->OnClick = PixelClick;
+		};
+	};
+};
+void TForm1::LoadFormFile(String FileName)
+{
+	TBitmap *Bitmap = new TBitmap;
+	Bitmap->LoadFromFile(FileName);
+
+  for (int i = 0; i < pWidth; i++)
+		for (int j = 0; j < pHeight; j++)
+		{
+      Pixels[i][j]->DisposeOf();
+		};
+
+	pWidth = Bitmap->Width;
+	pHeight = Bitmap->Height;
+
+	Pixels = new TRectangle **[pWidth];
+	for (int i = 0; i < pWidth; i++)
+	{
+		Pixels[i] = new TRectangle *[pHeight];
+		for (int j = 0; j < pHeight; j++)
+		{
+			Pixels[i][j] = new TRectangle(this);
+			Pixels[i][j]->Parent = PixelsConteiner;
+			Pixels[i][j]->Position->X = 15 * i;
+			Pixels[i][j]->Position->Y = 15 * j;
+			Pixels[i][j]->Width = 15;
+			Pixels[i][j]->Height = 15;
+			Pixels[i][j]->Stroke->Kind = TBrushKind::None;
+			Pixels[i][j]->OnClick = PixelClick;
+		};
+	};
+
+
+	TBitmapData BitmapData;
+	try
+	{
+		Bitmap->Map(TMapAccess::Read,BitmapData);
+
+		PAlphaColorArray line;
+
+		for (int i = 0; i < BitmapData.Height; i++)
+		{
+			line = BitmapData.Data[i];
+			for (int j = 0; j < BitmapData.Width; j++)
+			{
+				if (line[j] == 0x00000000)
+				{
+					Pixels[j][i]->Fill->Color = 0xFF333333;
+				}
+				else if (line[j] == 0xFFFFFFFF)
+				{
+					Pixels[j][i]->Fill->Color = 0xFF33CC33;
+				}
+				else
+				{
+
+				};
+			};
+		};
+	}
+	__finally
+	{
+		Bitmap->Unmap(BitmapData);
+	};
+
+
+	Bitmap->DisposeOf();
+};
+
+
+void __fastcall TForm1::FormShow(TObject *Sender)
+{
+	Form2->Show();
+}
+//---------------------------------------------------------------------------
+

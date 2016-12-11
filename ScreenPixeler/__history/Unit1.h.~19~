@@ -1,0 +1,52 @@
+//---------------------------------------------------------------------------
+
+#ifndef Unit1H
+#define Unit1H
+//---------------------------------------------------------------------------
+#include <System.Classes.hpp>
+#include <FMX.Controls.hpp>
+#include <FMX.Forms.hpp>
+#include <FMX.Objects.hpp>
+#include <FMX.Types.hpp>
+#include <FMX.Controls.Presentation.hpp>
+#include <FMX.Edit.hpp>
+#include <FMX.StdCtrls.hpp>
+#include <FMX.Layouts.hpp>
+#include <FMX.Memo.hpp>
+//---------------------------------------------------------------------------
+class TForm1 : public TForm
+{
+__published:	// IDE-managed Components
+	TRectangle *PixelsConteiner;
+	TPanel *Panel1;
+	TLabel *Label1;
+	TRectangle *Rectangle1;
+	TLabel *Label2;
+	TEdit *Edit1;
+	TRectangle *Rectangle2;
+	TLabel *Label3;
+	TEdit *Edit2;
+	TButton *Button1;
+	TRectangle *Rectangle3;
+	TLabel *Label4;
+	TMemo *Memo1;
+	TLabel *Label5;
+	TRectangle *Rectangle4;
+	TLabel *Label6;
+	TMemo *Memo2;
+	void __fastcall FormCreate(TObject *Sender);
+	void __fastcall FormDestroy(TObject *Sender);
+	void __fastcall PixelClick(TObject *Sender);
+	void __fastcall Button1Click(TObject *Sender);
+private:	// User declarations
+	TRectangle ***Pixels;
+	int pWidth,pHeight;
+public:		// User declarations
+	__fastcall TForm1(TComponent* Owner);
+
+	void PrintResult();
+};
+//---------------------------------------------------------------------------
+extern PACKAGE TForm1 *Form1;
+//---------------------------------------------------------------------------
+#endif

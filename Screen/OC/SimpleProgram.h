@@ -1,0 +1,32 @@
+#ifndef _PROGRAM_SIMPLEPROGRAM_
+#define _PROGRAM_SIMPLEPROGRAM_
+#include <Arduino.h>
+
+static const unsigned char SimpleProgramIcon[] PROGMEM =
+{
+  B11111111,  B11111111,  B10000000,
+  B10001000,  B10001000,  B10000000,
+  B11011011,  B10111101,  B10000000,
+  B11011000,  B10001101,  B10000000,
+  B11011011,  B11101101,  B10000000,
+  B11011000,  B10001101,  B10000000,
+  B11111111,  B11111111,  B10000000,
+  B11010110,  B10001111,  B10000000,
+  B11110010,  B10111111,  B10000000,
+  B11010100,  B10101111,  B10000000,
+  B11010110,  B10001111,  B10000000,
+  B11111111,  B11111111,  B10000000,
+};
+
+class TSimpleProgram : public TProgram
+{
+  private:
+  public:
+  TSimpleProgram();
+  
+  void Start();
+  void ReadButtons(byte &Buttons);
+  void Paint(LCD *Canvas);
+};
+#endif
+

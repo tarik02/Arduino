@@ -1,0 +1,92 @@
+#ifndef _PROGRAM_FLAPPYBIRD_
+#define _PROGRAM_FLAPPYBIRD_
+#include <Arduino.h>
+
+static const unsigned char FlappyBirdIcon[] PROGMEM =
+{
+  B00000011,  B11110000,  B00000000,
+  B00001100,  B01001000,  B00000000,
+  B00010000,  B10000100,  B00000000,
+  B00100000,  B10001010,  B00000000,
+  B01000000,  B10001010,  B00000000,
+  B01000000,  B01000010,  B00000000,
+  B01111100,  B00111110,  B00000000,
+  B10000010,  B01000001,  B00000000,
+  B10000100,  B10111110,  B00000000,
+  B10001000,  B01000001,  B00000000,
+  B01111000,  B00111110,  B00000000,
+  B00000111,  B11000000,  B00000000,
+};
+
+static const unsigned char PROGMEM flappybird_frame_1[] =
+{
+  B00000111,  B00000000,
+  B00001000,  B10000000,
+  B00110000,  B10000000,
+  B01010000,  B11000000,
+  B01010000,  B10100000,
+  B10001001,  B00100000,
+  B10000110,  B00010000,
+  B10000000,  B00010000,
+  B10010001,  B11010000,
+  B10101010,  B00110000,
+  B01010100,  B00010000,
+  B01010100,  B00010000,
+  B01010101,  B10100000,
+  B01010100,  B01000000,
+  B01010111,  B10000000,
+  B00101000,  B00000000,
+};
+static const unsigned char PROGMEM flappybird_frame_2[] =
+{
+  B00111000,  B00000000,
+  B01000111,  B00000000,
+  B01000100,  B10000000,
+  B01000100,  B01000000,
+  B01100100,  B00100000,
+  B10010100,  B00100000,
+  B10001000,  B00010000,
+  B10000000,  B00010000,
+  B10010001,  B11010000,
+  B10101010,  B00110000,
+  B01010100,  B00010000,
+  B01010100,  B00010000,
+  B01010101,  B10100000,
+  B01010100,  B01000000,
+  B01010111,  B10000000,
+  B00101000,  B00000000,
+};
+
+struct TFlappyBirdWalls
+{
+  int Value;
+  int Position;
+};
+
+class TFlappyBird : public TProgram
+{
+  friend void TFlappyBirdonWorkTimer(void *Data);
+  private:
+  TTimer *WorkTimer;
+  
+  int y;
+  
+  bool Playing;
+  bool doOver;
+  
+  TFlappyBirdWalls Walls[2];
+  
+  uint8_t birdJump;
+  public:
+  TFlappyBird();
+  
+  void Start();
+  void ReadButtons(byte &Buttons);
+  void Paint(LCD *Canvas);
+  
+  void StartGame();
+};
+
+
+#endif
+
